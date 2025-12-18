@@ -59,6 +59,11 @@ export default function GNGContainer() {
     setCategoryShow(false)
   }
 
+  const handleCategoryChanged = () => {
+    setCategoryShow(true)
+    resetFromBeginning()
+  }
+
   const selectWord = () => {
     resetFromBeginning()
     playBgMusic() // شروع موسیقی پس‌زمینه بعد از اولین تعامل
@@ -128,7 +133,7 @@ export default function GNGContainer() {
   
 
   return (
-    <div dir={lang === "fa" ? "rtl" : "ltr"} className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-indigo-100 via-blue-50 to-blue-100 py-10">
+    <div dir={lang === "fa" ? "rtl" : "ltr"} className="pl-2 pr-2 min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-indigo-100 via-blue-50 to-blue-100 py-10">
 
       {/* Category Modal */}
       {categoryShow && (
@@ -151,7 +156,7 @@ export default function GNGContainer() {
       <div className="flex flex-wrap gap-4 justify-center mb-6">
         {!categoryShow && (
           <button
-            onClick={() => setCategoryShow(true)}
+            onClick={handleCategoryChanged}
             className="cursor-pointer bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-3xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-105 text-lg"
             style={{ fontFamily: "Vazirmatn" }}
           >
@@ -192,17 +197,17 @@ export default function GNGContainer() {
           <GNGCards lettersList={lettersList} wrongLetters={wrongLetters} />
 
           {lettersList.every(item => item.shown) && (
-            <p className="text-green-600 font-extrabold text-3xl mt-6 animate-pulse drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
+            <p className="text-center text-green-600 font-extrabold text-3xl mt-6 animate-pulse drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
               {lang === "en" ? "🎉 Congratulations! You've guessed the word. 🎉" : "🎉 آفرین! کلمه رو درست حدس زدی. 🎉"}
             </p>
           )}
 
           {isGameOver && (
-            <p className="text-red-600 font-extrabold text-3xl mt-6 animate-pulse drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
+            <p className="text-center text-red-600 font-extrabold text-3xl mt-6 animate-pulse drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
               {lang === "en" ? (
-                <>❌ Game Over! The word: <span className="text-red-500 text-4xl font-extrabold">{randomWord}</span> ❌</>
+                <>❌ Game Over! The word: <span className="text-red-500 text-4xl font-extrabold">{randomWord}</span></>
               ) : (
-                <>❌ تلاشات تموم شد! کلمه درست: <span className="text-red-500 text-4xl font-extrabold">{randomWord}</span> ❌</>
+                <>❌ تلاشات تموم شد! کلمه درست: <span className="text-red-500 text-4xl font-extrabold">{randomWord}</span></>
               )}
             </p>
           )}
