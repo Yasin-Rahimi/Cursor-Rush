@@ -127,6 +127,7 @@ export default function GNGContainer() {
   
     if (wrongLetters.length >= lettersList.length) {
       setIsGameOver(true)
+      setDisabledInput(true)
       gameOverSoundRef.current?.play().catch(() => {})
     }
   }, [lettersList, wrongLetters])
