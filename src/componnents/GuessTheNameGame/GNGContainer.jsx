@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef } from "react"
 import { v4 } from "uuid"
+
 import GNGInput from "./GNGInput"
 import GNGCards from "./GNGCards"
 import GNGCategory from "./GNGCategory";
-import { words } from "./WordsBank.js"
+import GNGLevel from "./GNGLevel";
+import { words } from "./WordsBank.jsx"
 
 import bgMusicFile from "./assets/bgMusicFile.mp3"
 import successSoundFile from "./assets/successSoundFile.mp3"
 import gameOverSoundFile from "./assets/gameOverSoundFile.mp3"
 
 export default function GNGContainer() {
+
   const [randomWord, setRandomWord] = useState("")
   const [lettersList, setLettersList] = useState([])
   const [wrongLetters, setWrongLetters] = useState([])
@@ -20,8 +23,15 @@ export default function GNGContainer() {
   const [category, setCategory] = useState("")
   const [isMuted, setIsMuted] = useState(false)
   const [cleanInput, setCleanInput] = useState(false)
+  const [level, setLevel] = useState()
+  const [levelShow, setLevelShow] = useState(false)
 
-  const WORDS = lang === 'en' ? words.en[category.en] : words.fa[category.en]
+  const WORDS =
+  category?.en && level
+    ? lang === "en"
+      ? words.en[category.en][level]
+      : words.fa[category.en][level]
+    : [];
 
   // ===== Audio Refs =====
   const bgAudioRef = useRef(null)
@@ -57,10 +67,21 @@ export default function GNGContainer() {
   const handleCategoryClicked = (value) => {
     setCategory(value)
     setCategoryShow(false)
+    setLevelShow(true)
   }
 
   const handleCategoryChanged = () => {
     setCategoryShow(true)
+    resetFromBeginning()
+  }
+
+  const handleLevelClicked = (level) => {
+    setLevel(level)
+    setLevelShow(false)
+  }
+
+  const handleLevelChanged = () => { 
+    setLevelShow(true)
     resetFromBeginning()
   }
 
@@ -148,9 +169,14 @@ export default function GNGContainer() {
         </div>
       )}
 
+      {/* Level Modal */}
+      {levelShow && (
+        <GNGLevel onClick={handleLevelClicked} />
+      )}
+
       {/* Header */}
-      <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-6 drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
-        {lang === "en" ? category.en ? `Guess the ${category.en} word` : `Guess the word game` : category.fa ? `بازی حدس ${category.fa}` : "بازی حدس کلمه"}
+      <h1 className="text-center text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-6 drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
+        {lang === "en" ? category.en ? `Guess the ${category.en}` : `Guess the word game` : category.fa ? `بازی حدس ${category.fa}` : "بازی حدس کلمه"}
       </h1>
 
       {/* Controls */}
@@ -162,6 +188,16 @@ export default function GNGContainer() {
             style={{ fontFamily: "Vazirmatn" }}
           >
             {lang === "en" ? "Change Category" : "تغییر دسته‌بندی"}
+          </button>
+        )}
+
+        {!levelShow && (
+          <button
+            onClick={handleLevelChanged}
+            className="cursor-pointer bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-3xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-105 text-lg"
+            style={{ fontFamily: "Vazirmatn" }}
+          >
+            {lang === "en" ? "Change Level" : "تغییر سطح"}
           </button>
         )}
 

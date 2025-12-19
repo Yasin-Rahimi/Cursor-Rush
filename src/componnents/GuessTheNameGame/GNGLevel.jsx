@@ -35,36 +35,33 @@ const customTheme = createTheme({
   inlineWrapper: "flex items-center",
 });
 
-export default function GNGCategory({ onClick }) {
+export default function GNGLevel({ onClick }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md">
       
       <div className="rounded-2xl bg-gray-900/90 p-8 shadow-2xl border border-white/10">
         <h2 className="mb-6 text-center text-xl font-bold text-white">
-          Choose a category
+          Choose a level
         </h2>
 
         <Dropdown
           className="cursor-pointer"
-          label="Select category"
+          label="Select level"
           dismissOnClick={true}
           customTheme={customTheme}
         >
-          <DropdownItem onClick={() => onClick({en: "country", fa: "کشور"})}>
-            🌍 Countries
+          <DropdownItem onClick={() => onClick("easy")}>
+            Easy
           </DropdownItem>
 
-          <DropdownItem onClick={() => onClick({en:"sport", fa:"ورزش"})}>
-            ⚽ Sports
+          <DropdownItem onClick={() => onClick("medium")}>
+            Medium
           </DropdownItem>
 
-          <DropdownItem onClick={() => onClick({en:"fruit", fa:"میوه"})}>
-            🍎 Fruits
+          <DropdownItem onClick={() => onClick("hard")}>
+            Hard
           </DropdownItem>
 
-          <DropdownItem onClick={() => onClick({en:"color", fa:"رنگ"})}>
-            🎨 Colors
-          </DropdownItem>
         </Dropdown>
       </div>
 
