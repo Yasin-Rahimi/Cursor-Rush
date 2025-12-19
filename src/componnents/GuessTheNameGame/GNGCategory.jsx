@@ -48,7 +48,6 @@ export default function GNGCategory({ onClick }) {
           className="cursor-pointer"
           label="Select category"
           dismissOnClick={true}
-          customTheme={customTheme}
         >
           <DropdownItem onClick={() => onClick({en: "country", fa: "کشور"})}>
             🌍 Countries

@@ -25,15 +25,20 @@ export default function GNGContainer() {
   const [cleanInput, setCleanInput] = useState(false)
   const [level, setLevel] = useState()
   const [levelShow, setLevelShow] = useState(false)
+  const [inMiddle, setInMiddle] = useState(false)
 
   const WORDS =
-  category?.en && level
-    ? lang === "en"
-      ? words.en[category.en][level]
-      : words.fa[category.en][level]
-    : [];
+    category?.en && level
+      ? lang === "en"
+        ? words.en[category.en][level]
+        : words.fa[category.en][level]
+      : [];
 
-  // ===== Audio Refs =====
+  const LEVEL_LABEL = {
+    en: { easy: "Easy", medium: "Medium", hard: "Hard" },
+    fa: { easy: "آسان", medium: "متوسط", hard: "سخت" }
+  }
+
   const bgAudioRef = useRef(null)
   const successSoundRef = useRef(null)
   const gameOverSoundRef = useRef(null)
@@ -67,7 +72,9 @@ export default function GNGContainer() {
   const handleCategoryClicked = (value) => {
     setCategory(value)
     setCategoryShow(false)
-    setLevelShow(true)
+    if (!inMiddle) {
+      setLevelShow(true)
+    }
   }
 
   const handleCategoryChanged = () => {
@@ -87,11 +94,14 @@ export default function GNGContainer() {
 
   const selectWord = () => {
     resetFromBeginning()
-    playBgMusic() // شروع موسیقی پس‌زمینه بعد از اولین تعامل
+    playBgMusic()
     const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)]
     setRandomWord(randomWord)
-    const letters = randomWord.split("").map(letter => ({ letter, shown: false, id: v4() }))
+    const letters = randomWord.split("").map(letter => ({ letter, shown: letter === " " ? true : false, isSpace: letter === " " ? true : false , id: v4() }))
     setLettersList(letters)
+    if (!inMiddle) {
+      setInMiddle(true)
+    }
   }
 
   const resetFromBeginning = () => {
@@ -100,7 +110,7 @@ export default function GNGContainer() {
     setDisabledInput(false)
     setIsGameOver(false)
     setCleanInput(true)
-    setTimeout(() => setCleanInput(false), 0) // Reset cleanInput after render
+    setTimeout(() => setCleanInput(false), 0)
   }
 
   const getCharLang = (char) => {
@@ -133,26 +143,24 @@ export default function GNGContainer() {
     resetFromBeginning()
   }
 
-  // ===== Game Effects =====
   useEffect(() => {
     if (!lettersList.length) return
-  
+
     const uniqueLetters = [...new Set(lettersList.map(l => l.letter))]
     const shownLetters = lettersList.filter(l => l.shown).map(l => l.letter)
     const isWin = uniqueLetters.every(l => shownLetters.includes(l))
-  
+
     if (isWin) {
       setDisabledInput(true)
       successSoundRef.current?.play().catch(() => {})
     }
-  
+
     if (wrongLetters.length >= lettersList.length) {
       setIsGameOver(true)
       setDisabledInput(true)
       gameOverSoundRef.current?.play().catch(() => {})
     }
   }, [lettersList, wrongLetters])
-  
 
   return (
     <div dir={lang === "fa" ? "rtl" : "ltr"} className="pl-2 pr-2 min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-indigo-100 via-blue-50 to-blue-100 py-10">
@@ -175,9 +183,15 @@ export default function GNGContainer() {
       )}
 
       {/* Header */}
-      <h1 className="text-center text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-6 drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
+      <h1 className="text-center text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
         {lang === "en" ? category.en ? `Guess the ${category.en}` : `Guess the word game` : category.fa ? `بازی حدس ${category.fa}` : "بازی حدس کلمه"}
       </h1>
+
+      {/* Level Subtitle */}
+      <p className="text-center text-lg md:text-xl font-semibold text-indigo-600 dark:text-indigo-300 mb-6" style={{ fontFamily: "Vazirmatn" }}>
+        {lang === "en" ? `Difficulty: ${LEVEL_LABEL.en[level]}` : `سطح: ${LEVEL_LABEL.fa[level]}`}
+      </p>
+    
 
       {/* Controls */}
       <div className="flex flex-wrap gap-4 justify-center mb-6">
@@ -229,7 +243,6 @@ export default function GNGContainer() {
       {/* Game Area */}
       {lettersList.length > 0 && (
         <div className="flex flex-col items-center w-full max-w-4xl px-4 sm:px-0">
-
           <GNGInput cleanInput={cleanInput} onGuess={handleGuess} disabled={disabledInput} />
           <GNGCards lettersList={lettersList} wrongLetters={wrongLetters} />
 

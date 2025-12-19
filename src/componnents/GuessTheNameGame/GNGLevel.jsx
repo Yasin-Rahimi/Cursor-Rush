@@ -48,7 +48,6 @@ export default function GNGLevel({ onClick }) {
           className="cursor-pointer"
           label="Select level"
           dismissOnClick={true}
-          customTheme={customTheme}
         >
           <DropdownItem onClick={() => onClick("easy")}>
             Easy

@@ -1,8 +1,12 @@
 // GNGCards.jsx
-export default function GNGCards({ lettersList, wrongLetters, lang }) {
+export default function GNGCards({ lettersList, wrongLetters }) {
+
+    console.log(lettersList);
+    
 
     const renderCards = () => {
-        return lettersList.map((letter, index) => (
+        return lettersList.map((letter, index) => {
+            return !letter.isSpace ? 
             <div
                 style={{
                     fontFamily: "Vazirmatn",
@@ -15,7 +19,20 @@ export default function GNGCards({ lettersList, wrongLetters, lang }) {
             >
                 {letter.shown ? letter.letter.toUpperCase() : "_"}
             </div>
-        ));
+            : 
+            <div
+            style={{
+                fontFamily: "Vazirmatn",
+                transitionDelay: `${index * 75}ms`
+            }}
+                key={letter.id}
+                className={`p-6 w-14 h-16 flex items-center justify-center m-2 rounded-2xl text-2xl font-bold shadow-lg 
+                        transition-all transform
+                        ${letter.shown ? "scale-105 opacity-100" : "scale-100 opacity-0"}`}
+                >
+                {letter.shown ? letter.letter.toUpperCase() : "_"}
+            </div>
+        });
     };
 
     const renderWrongCards = () => {
