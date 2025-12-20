@@ -29,6 +29,8 @@ export default function GNGContainer() {
   const [levelShow, setLevelShow] = useState(false);
   const [inMiddle, setInMiddle] = useState(false);
   const [perfectBonus, setPerfectBonus] = useState(false);
+  const [currentScore, setCurrentScore] = useState(0);
+
 
 
   const WORDS =
@@ -60,6 +62,15 @@ export default function GNGContainer() {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!uid) return;
+  
+    getCurrentScore().then(score => {
+      setCurrentScore(score || 0);
+    });
+  }, [uid]);
+  
 
   useEffect(() => {
     bgAudioRef.current = new Audio(bgMusicFile);
@@ -186,7 +197,7 @@ export default function GNGContainer() {
         else if (level === 'easy') updatedScore = score + (10 * (bonus ? 2 : 1));
 
         saveScore(updatedScore, category.en, level, lang);
-        console.log("last score: " + score + " Updated score:", updatedScore, "Perfect bonus:", bonus);
+        setCurrentScore(updatedScore);
       });
     }
 
@@ -217,10 +228,20 @@ export default function GNGContainer() {
       {levelShow && <GNGLevel onClick={handleLevelClicked} />}
     <div dir={lang === "fa" ? "rtl" : "ltr"} className="pl-2 pr-2 min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-indigo-100 via-blue-50 to-blue-100 py-10">
 
+
+
       {/* Header */}
       <h1 className="text-center text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
         {lang === "en" ? category.en ? `Guess the ${category.en}` : `Guess the word game` : category.fa ? `بازی حدس ${category.fa}` : "بازی حدس کلمه"}
       </h1>
+
+      {/* Score */}
+      <div className="mb-2 p-4 rounded-2xl bg-gradient-to-r from-indigo-400 to-purple-500 shadow-2xl text-white font-bold text-xl flex items-center justify-center gap-2">
+        {lang === "en" ? "Score:" : "امتیاز:"} {currentScore}
+        {perfectBonus && lettersList.every(l => l.shown) && (
+          <span className="ml-2 text-yellow-300 font-extrabold animate-pulse">★ Perfect!</span>
+        )}
+      </div>
 
       {/* Level Subtitle */}
       <p className="text-center text-lg md:text-xl font-semibold text-indigo-600 dark:text-indigo-300 mb-6" style={{ fontFamily: "Vazirmatn" }}>
@@ -257,13 +278,6 @@ export default function GNGContainer() {
           {lang === "en" ? "فارسی" : "English"}
         </button>
 
-        <button
-          onClick={selectWord}
-          className="cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-6 font-bold rounded-3xl shadow-lg transition-all duration-300 transform hover:scale-105 text-lg"
-          style={{ fontFamily: "Vazirmatn" }}
-        >
-          {lang === "en" ? "Select Word" : "انتخاب کلمه"}
-        </button>
 
         <button
           onClick={toggleMute}
@@ -272,6 +286,16 @@ export default function GNGContainer() {
         >
           {isMuted ? (lang === "en" ? "Unmute" : "باز کردن صدا") : (lang === "en" ? "Mute" : "بی‌صدا")}
         </button>
+
+        <button
+          onClick={selectWord}
+          className="cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-6 font-bold rounded-3xl shadow-lg transition-all duration-300 transform hover:scale-105 text-lg"
+          style={{ fontFamily: "Vazirmatn" }}
+        >
+          {lang === "en" ? "Select Word" : "انتخاب کلمه"}
+        </button>
+        
+
       </div>
 
       {/* Game Area */}
