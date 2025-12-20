@@ -61,6 +61,7 @@ export default function GNGSideBar({
             <SidebarItem
               icon={HiAdjustments}
               onClick={handleCategoryChanged}
+              className="cursor-pointer"
             >
               {lang === "en" ? "Change Category" : "تغییر دسته‌بندی"}
             </SidebarItem>
@@ -69,6 +70,7 @@ export default function GNGSideBar({
             <SidebarItem
               icon={HiCog}
               onClick={handleLevelChanged}
+              className="cursor-pointer"
             >
               {lang === "en" ? "Change Level" : "تغییر سطح"}
             </SidebarItem>
@@ -77,6 +79,7 @@ export default function GNGSideBar({
             <SidebarItem
               icon={HiTranslate}
               onClick={toggleLang}
+              className="cursor-pointer"
             >
               {lang === "en" ? "فارسی" : "English"}
             </SidebarItem>
@@ -85,6 +88,7 @@ export default function GNGSideBar({
             <SidebarItem
               icon={HiVolumeUp}
               onClick={toggleMute}
+              className="cursor-pointer"
             >
               {isMuted
                 ? (lang === "en" ? "Unmute" : "باز کردن صدا")

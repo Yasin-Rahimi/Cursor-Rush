@@ -274,7 +274,7 @@ export default function GNGContainer() {
       {/* Select Word Button */}
       <button
         onClick={selectWord}
-        className="bg-emerald-500 hover:bg-emerald-600  mb-4 text-white py-3 px-8 font-bold rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-lg animate-fade-in delay-200"
+        className="bg-emerald-500 cursor-pointer hover:bg-emerald-600  mb-4 text-white py-3 px-8 font-bold rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-lg animate-fade-in delay-200"
         style={{ fontFamily: "Vazirmatn" }}
       >
         {lang === "en" ? "Select Word" : "انتخاب کلمه"}
@@ -287,7 +287,7 @@ export default function GNGContainer() {
       {/* Sidebar */}
       {showSidebarBtn && <button
         onClick={() => setIsSidebarOpen(prev => !prev)}
-        className={`fixed top-[20px] z-60 ${lang === "en" ? "left-5" : "right-5"} bg-purple-600 text-white p-3 rounded-full shadow-lg`}
+        className={`cursor-pointer fixed top-[20px] z-60 ${lang === "en" ? "left-5" : "right-5"} bg-purple-600 text-white p-3 rounded-full shadow-lg`}
       >
         {isSidebarOpen ? (lang === "en" ? "⮜" : "⮞") : (lang === "en" ? "⮞" : "⮜")}
       </button>}
