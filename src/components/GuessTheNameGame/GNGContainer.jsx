@@ -32,6 +32,7 @@ export default function GNGContainer() {
   const [perfectBonus, setPerfectBonus] = useState(false);
   const [currentScore, setCurrentScore] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showSidebarBtn, setShowSidebarBtn] = useState(false);
 
   const WORDS =
     category?.en && level
@@ -113,6 +114,7 @@ export default function GNGContainer() {
     setLevel(level);
     setLevelShow(false);
     setInMiddle(true);
+    setShowSidebarBtn(true);
   };
 
   const handleLevelChanged = () => {
@@ -283,12 +285,12 @@ export default function GNGContainer() {
 
 
       {/* Sidebar */}
-      <button
+      {showSidebarBtn && <button
         onClick={() => setIsSidebarOpen(prev => !prev)}
-        className="fixed top-[20px] left-4 z-60 bg-purple-600 text-white p-3 rounded-full shadow-lg"
+        className={`fixed top-[20px] z-60 ${lang === "en" ? "left-5" : "right-5"} bg-purple-600 text-white p-3 rounded-full shadow-lg`}
       >
-        {isSidebarOpen ? "⮜" : "⮞"}
-      </button>
+        {isSidebarOpen ? (lang === "en" ? "⮜" : "⮞") : (lang === "en" ? "⮞" : "⮜")}
+      </button>}
 
       {/* Sidebar Overlay */}
       <GNGSideBar

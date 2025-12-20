@@ -41,12 +41,20 @@ export default function GNGSideBar({
       )}
 
       {/* Sidebar */}
-      <Sidebar
+        <Sidebar
         theme={customTheme}
         aria-label="Game sidebar"
-        className={`fixed top-0 left-0 h-full z-50 transform transition-transform duration-300
-          ${isOpen ? "translate-x-0" : "-translate-x-full"} shadow-xl`}
-      >
+        className={`fixed top-0 h-full z-50 transform transition-transform duration-300 shadow-xl
+        ${lang === "en" 
+            ? isOpen 
+            ? "translate-x-0 left-0" 
+            : "-translate-x-full left-0" 
+            : isOpen 
+            ? "translate-x-0 right-0" 
+            : "translate-x-full right-0"
+        }`}
+        >
+
         <SidebarItems className="mt-16">
           <SidebarItemGroup>
             {/* Change Category */}
