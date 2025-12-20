@@ -1,36 +1,52 @@
-import { useState, useEffect } from "react"
-
+import { useState, useEffect, useRef } from "react";
 export default function GNGInput({ onGuess, disabled, cleanInput }) {
-
-    useEffect(() => {
-        if (cleanInput) {
-            setInputValue("")
-        }
-    }, [cleanInput])
-
-    const [inputValue, setInputValue] = useState("")
-
-    const handleChange = (e) => {
-        setInputValue(e.target.value)
+  const [input, setInput] = useState("");
+  const inputRef = useRef(null);
+  useEffect(() => {
+    if (cleanInput) {
+      setInput("");
     }
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter" && inputValue) {
-            onGuess(inputValue.toLowerCase())
-            setInputValue("")
-        }
+  }, [cleanInput]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (input.trim() && !disabled) {
+      onGuess(input.trim().toLowerCase());
+      setInput("");
     }
-
-    return (
-        <input
-            maxLength={1}
-            className="border-2 border-blue-400 bg-white w-20 p-3 rounded-2xl font-bold text-center text-2xl shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-            type="text"
-            value={inputValue}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder="-"
-            disabled={disabled}
-        />
-    )
+  };
+  const handleChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 1) {
+      setInput(value);
+      if (value.length === 1 && !disabled) {
+        onGuess(value.toLowerCase());
+        setTimeout(() => setInput(""), 100);
+      }
+    }
+  };
+  return (
+    <form onSubmit={handleSubmit} className="w-full flex justify-center mb-2">
+      <input
+        ref={inputRef}
+        type="text"
+        value={input}
+        onChange={handleChange}
+        disabled={disabled}
+        placeholder={disabled ? "" : "Type a letter..."}
+        className={`
+          w-full max-w-[500px] h-[60px]
+          text-2xl text-center font-bold
+          border-3 rounded-2xl
+          transition-all duration-200 ease-in-out
+          ${disabled
+            ? 'bg-gray-100 border-gray-300 cursor-not-allowed opacity-60'
+            : 'bg-white border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 focus:outline-none'
+          }
+          sm:h-[50px] sm:text-xl
+          placeholder:text-gray-400 placeholder:font-normal
+        `}
+        style={{ fontFamily: "Vazirmatn, sans-serif" }}
+      />
+    </form>
+  );
 }

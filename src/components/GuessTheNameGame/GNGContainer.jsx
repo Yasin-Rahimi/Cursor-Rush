@@ -10,7 +10,8 @@ import bgMusicFile from "./assets/bgMusicFile.mp3";
 import successSoundFile from "./assets/successSoundFile.mp3";
 import gameOverSoundFile from "./assets/gameOverSoundFile.mp3";
 import { auth, getUserUID } from "../../firebase";
-import { saveScore, getCurrentScore, resetScore } from "./scoreService.js";
+import { saveScore, getCurrentScore, resetScore, getLeaderboard, cleanInvalidScores } from "./scoreService.js";
+import GNGSideBar from "./GNGSideBar.jsx";
 
 export default function GNGContainer() {
 
@@ -30,8 +31,7 @@ export default function GNGContainer() {
   const [inMiddle, setInMiddle] = useState(false);
   const [perfectBonus, setPerfectBonus] = useState(false);
   const [currentScore, setCurrentScore] = useState(0);
-
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const WORDS =
     category?.en && level
@@ -198,6 +198,10 @@ export default function GNGContainer() {
 
         saveScore(updatedScore, category.en, level, lang);
         setCurrentScore(updatedScore);
+        getLeaderboard().then(data => {
+          console.log(data)
+        })
+        
       });
     }
 
@@ -205,7 +209,7 @@ export default function GNGContainer() {
       setIsGameOver(true);
       setDisabledInput(true);
       gameOverSoundRef.current?.play().catch(() => {});
-      resetScore()
+      // resetScore()
     }
   }, [lettersList, wrongLetters, uid]);
 
@@ -226,77 +230,79 @@ export default function GNGContainer() {
 
       {/* Level Modal */}
       {levelShow && <GNGLevel onClick={handleLevelClicked} />}
-    <div dir={lang === "fa" ? "rtl" : "ltr"} className="pl-2 pr-2 min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-indigo-100 via-blue-50 to-blue-100 py-10">
+    <div dir={lang === "fa" ? "rtl" : "ltr"} className="pl-2 pr-2 min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-indigo-100 via-blue-50 to-blue-100 py-6">
 
 
+
+    <div className="flex flex-col items-center w-full max-w-4xl px-4 sm:px-0 space-y-6">
 
       {/* Header */}
-      <h1 className="text-center text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
-        {lang === "en" ? category.en ? `Guess the ${category.en}` : `Guess the word game` : category.fa ? `بازی حدس ${category.fa}` : "بازی حدس کلمه"}
+      <h1
+        className="text-center text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 drop-shadow-lg animate-fade-in"
+        style={{ fontFamily: "Vazirmatn" }}
+      >
+        {lang === "en" 
+          ? category.en ? `Guess ${category.en}` : `Guess the word game`
+          : category.fa ? `حدس ${category.fa}` : "بازی حدس کلمه"
+        }
       </h1>
 
-      {/* Score */}
-      <div className="mb-2 p-4 rounded-2xl bg-gradient-to-r from-indigo-400 to-purple-500 shadow-2xl text-white font-bold text-xl flex items-center justify-center gap-2">
-        {lang === "en" ? "Score:" : "امتیاز:"} {currentScore}
-        {perfectBonus && lettersList.every(l => l.shown) && (
-          <span className="ml-2 text-yellow-300 font-extrabold animate-pulse">★ Perfect!</span>
-        )}
-      </div>
-
       {/* Level Subtitle */}
-      <p className="text-center text-lg md:text-xl font-semibold text-indigo-600 dark:text-indigo-300 mb-6" style={{ fontFamily: "Vazirmatn" }}>
+      <p
+        className="text-center text-lg md:text-xl font-semibold text-indigo-600 dark:text-indigo-300 mb-2 animate-fade-in delay-100"
+        style={{ fontFamily: "Vazirmatn" }}
+      >
         {lang === "en" ? `Difficulty: ${LEVEL_LABEL.en[level]}` : `سطح: ${LEVEL_LABEL.fa[level]}`}
       </p>
 
-      {/* Controls */}
-      <div className="flex flex-wrap gap-4 justify-center mb-6">
-        {!categoryShow && (
-          <button
-            onClick={handleCategoryChanged}
-            className="cursor-pointer bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-3xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-105 text-lg"
-            style={{ fontFamily: "Vazirmatn" }}
-          >
-            {lang === "en" ? "Change Category" : "تغییر دسته‌بندی"}
-          </button>
-        )}
-
-        {!levelShow && (
-          <button
-            onClick={handleLevelChanged}
-            className="cursor-pointer bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-3xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-105 text-lg"
-            style={{ fontFamily: "Vazirmatn" }}
-          >
-            {lang === "en" ? "Change Level" : "تغییر سطح"}
-          </button>
-        )}
-
-        <button
-          onClick={handleLangClick}
-          className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-3xl shadow-md font-semibold transition-all duration-300 transform hover:scale-105 text-lg"
-          style={{ fontFamily: "Vazirmatn" }}
-        >
-          {lang === "en" ? "فارسی" : "English"}
-        </button>
-
-
-        <button
-          onClick={toggleMute}
-          className="cursor-pointer bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-3xl shadow-md transition-all duration-300 transform font-bold hover:scale-105 text-lg"
-          style={{ fontFamily: "Vazirmatn" }}
-        >
-          {isMuted ? (lang === "en" ? "Unmute" : "باز کردن صدا") : (lang === "en" ? "Mute" : "بی‌صدا")}
-        </button>
-
-        <button
-          onClick={selectWord}
-          className="cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-6 font-bold rounded-3xl shadow-lg transition-all duration-300 transform hover:scale-105 text-lg"
-          style={{ fontFamily: "Vazirmatn" }}
-        >
-          {lang === "en" ? "Select Word" : "انتخاب کلمه"}
-        </button>
+      {/* Score Card */}
+      <div
+        className="relative w-full max-w-md p-5 rounded-3xl bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 shadow-2xl text-white font-bold text-xl flex items-center justify-center gap-3 hover:scale-105"
+        style={{ fontFamily: "Vazirmatn" }}
+      >
+        {lang === "en" ? "Score:" : "امتیاز:"} {currentScore}
         
+        {perfectBonus && lettersList.every(l => l.shown) && (
+          <span className="ml-3 text-yellow-300 font-extrabold animate-bounce drop-shadow-lg">
+            {lang === 'en' ? '★ Perfect!' : '★ بدون اشتباه!'}
+          </span>
+        )}
+      </div>
+
+      {/* Select Word Button */}
+      <button
+        onClick={selectWord}
+        className="bg-emerald-500 hover:bg-emerald-600  mb-4 text-white py-3 px-8 font-bold rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-lg animate-fade-in delay-200"
+        style={{ fontFamily: "Vazirmatn" }}
+      >
+        {lang === "en" ? "Select Word" : "انتخاب کلمه"}
+      </button>
 
       </div>
+
+
+
+      {/* Sidebar */}
+      <button
+        onClick={() => setIsSidebarOpen(prev => !prev)}
+        className="fixed top-[20px] left-4 z-60 bg-purple-600 text-white p-3 rounded-full shadow-lg"
+      >
+        {isSidebarOpen ? "⮜" : "⮞"}
+      </button>
+
+      {/* Sidebar Overlay */}
+      <GNGSideBar
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+        lang={lang}
+        toggleLang={handleLangClick}
+        toggleMute={toggleMute}
+        isMuted={isMuted}
+        handleCategoryChanged={handleCategoryChanged}
+        handleLevelChanged={handleLevelChanged}
+      />
+
+
 
       {/* Game Area */}
       {lettersList.length > 0 && (

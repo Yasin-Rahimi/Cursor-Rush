@@ -1,6 +1,16 @@
 // src/services/scoreService.js
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth, getUserUID } from "../../firebase";
+import {
+    query,
+    orderBy,
+    limit,
+    getDocs
+} from "firebase/firestore";
+import {
+    collection,
+    deleteDoc,
+} from "firebase/firestore";
 
 /**
  * تابع ذخیره یا آپدیت امتیاز کاربر
@@ -67,3 +77,43 @@ export async function resetScore() {
 
   console.log("Score reset to 0");
 }
+
+export async function getLeaderboard(top = 10) {
+try {
+    const q = query(
+    collection(db, "leaderboard"),
+    orderBy("score", "desc"),
+    limit(top)
+    );
+
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+    }));
+} catch (err) {
+    console.error("Error loading leaderboard:", err);
+    return [];
+}
+}
+
+
+  export async function cleanInvalidScores() {
+    const colRef = collection(db, "leaderboard");
+    const snapshot = await getDocs(colRef);
+  
+    let deletedCount = 0;
+  
+    for (const d of snapshot.docs) {
+      const data = d.data();
+  
+      if (typeof data.score !== "number") {
+        await deleteDoc(doc(db, "leaderboard", d.id));
+        deletedCount++;
+      }
+    }
+  
+    console.log(`🧹 Cleaned ${deletedCount} invalid documents`);
+  }
+  
