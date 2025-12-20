@@ -1,31 +1,35 @@
-import { useState, useEffect, useRef } from "react"
-import { v4 } from "uuid"
+import { useState, useEffect, useRef } from "react";
+import { v4 } from "uuid";
 
-import GNGInput from "./GNGInput"
-import GNGCards from "./GNGCards"
+import GNGInput from "./GNGInput";
+import GNGCards from "./GNGCards";
 import GNGCategory from "./GNGCategory";
 import GNGLevel from "./GNGLevel";
-import { words } from "./WordsBank.jsx"
-
-import bgMusicFile from "./assets/bgMusicFile.mp3"
-import successSoundFile from "./assets/successSoundFile.mp3"
-import gameOverSoundFile from "./assets/gameOverSoundFile.mp3"
+import { words } from "./WordsBank.jsx";
+import bgMusicFile from "./assets/bgMusicFile.mp3";
+import successSoundFile from "./assets/successSoundFile.mp3";
+import gameOverSoundFile from "./assets/gameOverSoundFile.mp3";
+import { auth, getUserUID } from "../../firebase";
+import { saveScore, getCurrentScore, resetScore } from "./scoreService.js";
 
 export default function GNGContainer() {
 
-  const [randomWord, setRandomWord] = useState("")
-  const [lettersList, setLettersList] = useState([])
-  const [wrongLetters, setWrongLetters] = useState([])
-  const [disabledInput, setDisabledInput] = useState(false)
-  const [isGameOver, setIsGameOver] = useState(false)
-  const [lang, setLang] = useState("en")
-  const [categoryShow, setCategoryShow] = useState(true)
-  const [category, setCategory] = useState("")
-  const [isMuted, setIsMuted] = useState(false)
-  const [cleanInput, setCleanInput] = useState(false)
-  const [level, setLevel] = useState()
-  const [levelShow, setLevelShow] = useState(false)
-  const [inMiddle, setInMiddle] = useState(false)
+  const [uid, setUid] = useState(null);
+  const [randomWord, setRandomWord] = useState("");
+  const [lettersList, setLettersList] = useState([]);
+  const [wrongLetters, setWrongLetters] = useState([]);
+  const [disabledInput, setDisabledInput] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [lang, setLang] = useState("en");
+  const [categoryShow, setCategoryShow] = useState(true);
+  const [category, setCategory] = useState("");
+  const [isMuted, setIsMuted] = useState(false);
+  const [cleanInput, setCleanInput] = useState(false);
+  const [level, setLevel] = useState();
+  const [levelShow, setLevelShow] = useState(false);
+  const [inMiddle, setInMiddle] = useState(false);
+  const [perfectBonus, setPerfectBonus] = useState(false);
+
 
   const WORDS =
     category?.en && level
@@ -37,134 +41,166 @@ export default function GNGContainer() {
   const LEVEL_LABEL = {
     en: { easy: "Easy", medium: "Medium", hard: "Hard" },
     fa: { easy: "آسان", medium: "متوسط", hard: "سخت" }
-  }
+  };
 
-  const bgAudioRef = useRef(null)
-  const successSoundRef = useRef(null)
-  const gameOverSoundRef = useRef(null)
+  const bgAudioRef = useRef(null);
+  const successSoundRef = useRef(null);
+  const gameOverSoundRef = useRef(null);
 
   useEffect(() => {
-    bgAudioRef.current = new Audio(bgMusicFile)
-    bgAudioRef.current.loop = true
-    bgAudioRef.current.volume = 0.2
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUid(user.uid);
+        console.log("User UID:", user.uid);
+      } else {
+        const anonUID = await getUserUID();
+        setUid(anonUID);
+        console.log("Anonymous UID:", anonUID);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
-    successSoundRef.current = new Audio(successSoundFile)
-    successSoundRef.current.volume = 0.4
+  useEffect(() => {
+    bgAudioRef.current = new Audio(bgMusicFile);
+    bgAudioRef.current.loop = true;
+    bgAudioRef.current.volume = 0.2;
 
-    gameOverSoundRef.current = new Audio(gameOverSoundFile)
-    gameOverSoundRef.current.volume = 0.4
-  }, [])
+    successSoundRef.current = new Audio(successSoundFile);
+    successSoundRef.current.volume = 0.4;
+
+    gameOverSoundRef.current = new Audio(gameOverSoundFile);
+    gameOverSoundRef.current.volume = 0.4;
+  }, []);
 
   const playBgMusic = () => {
     if (bgAudioRef.current && bgAudioRef.current.paused) {
-      bgAudioRef.current.play().catch(() => {})
+      bgAudioRef.current.play().catch(() => {});
     }
-  }
+  };
 
   const toggleMute = () => {
-    setIsMuted(prev => !prev)
-    const newMuted = !isMuted
-    if (bgAudioRef.current) bgAudioRef.current.muted = newMuted
-    if (successSoundRef.current) successSoundRef.current.muted = newMuted
-    if (gameOverSoundRef.current) gameOverSoundRef.current.muted = newMuted
-  }
+    setIsMuted(prev => !prev);
+    const newMuted = !isMuted;
+    if (bgAudioRef.current) bgAudioRef.current.muted = newMuted;
+    if (successSoundRef.current) successSoundRef.current.muted = newMuted;
+    if (gameOverSoundRef.current) gameOverSoundRef.current.muted = newMuted;
+  };
 
   const handleCategoryClicked = (value) => {
-    setCategory(value)
-    setCategoryShow(false)
-    if (!inMiddle) {
-      setLevelShow(true)
-    }
-  }
+    setCategory(value);
+    setCategoryShow(false);
+    if (!inMiddle) setLevelShow(true);
+  };
 
   const handleCategoryChanged = () => {
-    setCategoryShow(true)
-    resetFromBeginning()
-  }
+    setCategoryShow(true);
+    resetFromBeginning();
+  };
 
   const handleLevelClicked = (level) => {
-    setLevel(level)
-    setLevelShow(false)
-  }
+    setLevel(level);
+    setLevelShow(false);
+    setInMiddle(true);
+  };
 
-  const handleLevelChanged = () => { 
-    setLevelShow(true)
-    resetFromBeginning()
-  }
+  const handleLevelChanged = () => {
+    setLevelShow(true);
+    resetFromBeginning();
+  };
 
   const selectWord = () => {
-    resetFromBeginning()
-    playBgMusic()
-    const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)]
-    setRandomWord(randomWord)
-    const letters = randomWord.split("").map(letter => ({ letter, shown: letter === " " ? true : false, isSpace: letter === " " ? true : false , id: v4() }))
-    setLettersList(letters)
-    if (!inMiddle) {
-      setInMiddle(true)
-    }
-  }
+    resetFromBeginning();
+    playBgMusic();
+    const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+    setRandomWord(randomWord);
+
+    const letters = randomWord.split("").filter(letter => letter !== "\u200C").map(letter => ({
+      letter,
+      shown: letter === " " ? true : false,
+      isSpace: letter === " " ? true : false,
+      id: v4()
+    }));
+    setLettersList(letters);
+  };
 
   const resetFromBeginning = () => {
-    setLettersList([])
-    setWrongLetters([])
-    setDisabledInput(false)
-    setIsGameOver(false)
-    setCleanInput(true)
-    setTimeout(() => setCleanInput(false), 0)
-  }
+    setLettersList([]);
+    setWrongLetters([]);
+    setDisabledInput(false);
+    setIsGameOver(false);
+    setCleanInput(true);
+    setTimeout(() => setCleanInput(false), 0);
+  };
 
   const getCharLang = (char) => {
-    if (/^[a-zA-Z]$/.test(char)) return "en"
-    if (/^[\u0600-\u06FF]$/.test(char)) return "fa"
-    return "invalid"
-  }
+    if (/^[a-zA-Z]$/.test(char)) return "en";
+    if (/^[\u0600-\u06FF]$/.test(char)) return "fa";
+    return "invalid";
+  };
 
   const handleGuess = (letter) => {
     if (getCharLang(letter) === lang) {
       if (lettersList.some(item => item.letter === letter)) {
         setLettersList(prev =>
           prev.map(item => (item.letter === letter ? { ...item, shown: true } : item))
-        )
+        );
       } else {
         setWrongLetters(prev =>
           prev.includes(letter) ? prev : [...prev, letter]
         );
       }
     } else {
-      alert(lang === "en"
-        ? "Please enter a valid letter for the selected language."
-        : "لطفاً یک حرف معتبر برای زبان انتخاب شده وارد کنید."
-      )
+      alert(
+        lang === "en"
+          ? "Please enter a valid letter for the selected language."
+          : "لطفاً یک حرف معتبر برای زبان انتخاب شده وارد کنید."
+      );
     }
-  }
+  };
 
   const handleLangClick = () => {
-    setLang(lang === "en" ? "fa" : "en")
-    resetFromBeginning()
-  }
+    setLang(lang === "en" ? "fa" : "en");
+    resetFromBeginning();
+  };
 
   useEffect(() => {
-    if (!lettersList.length) return
+    if (!lettersList.length || !uid) return;
 
-    const uniqueLetters = [...new Set(lettersList.map(l => l.letter))]
-    const shownLetters = lettersList.filter(l => l.shown).map(l => l.letter)
-    const isWin = uniqueLetters.every(l => shownLetters.includes(l))
+    const uniqueLetters = [...new Set(lettersList.map(l => l.letter))];
+    const shownLetters = lettersList.filter(l => l.shown).map(l => l.letter);
+    const isWin = uniqueLetters.every(l => shownLetters.includes(l));
 
     if (isWin) {
-      setDisabledInput(true)
-      successSoundRef.current?.play().catch(() => {})
+      setDisabledInput(true);
+      successSoundRef.current?.play().catch(() => {});
+    
+      const wrongAnswers = wrongLetters.length;
+      const bonus = wrongAnswers === 0;
+      setPerfectBonus(bonus); // <-- اینجا state رو آپدیت می‌کنیم
+    
+      getCurrentScore().then(score => {
+        let updatedScore
+        if (level === 'hard') updatedScore = score + (30 * (bonus ? 2 : 1));
+        else if (level === 'medium') updatedScore = score + (20 * (bonus ? 2 : 1));
+        else if (level === 'easy') updatedScore = score + (10 * (bonus ? 2 : 1));
+
+        saveScore(updatedScore, category.en, level, lang);
+        console.log("last score: " + score + " Updated score:", updatedScore, "Perfect bonus:", bonus);
+      });
     }
 
     if (wrongLetters.length >= lettersList.length) {
-      setIsGameOver(true)
-      setDisabledInput(true)
-      gameOverSoundRef.current?.play().catch(() => {})
+      setIsGameOver(true);
+      setDisabledInput(true);
+      gameOverSoundRef.current?.play().catch(() => {});
+      resetScore()
     }
-  }, [lettersList, wrongLetters])
+  }, [lettersList, wrongLetters, uid]);
+
 
   return (
-    <div dir={lang === "fa" ? "rtl" : "ltr"} className="pl-2 pr-2 min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-indigo-100 via-blue-50 to-blue-100 py-10">
-
+    <>
       {/* Category Modal */}
       {categoryShow && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md">
@@ -178,9 +214,8 @@ export default function GNGContainer() {
       )}
 
       {/* Level Modal */}
-      {levelShow && (
-        <GNGLevel onClick={handleLevelClicked} />
-      )}
+      {levelShow && <GNGLevel onClick={handleLevelClicked} />}
+    <div dir={lang === "fa" ? "rtl" : "ltr"} className="pl-2 pr-2 min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-indigo-100 via-blue-50 to-blue-100 py-10">
 
       {/* Header */}
       <h1 className="text-center text-4xl md:text-5xl font-extrabold text-indigo-700 dark:text-indigo-400 mb-2 drop-shadow-lg" style={{ fontFamily: "Vazirmatn" }}>
@@ -191,7 +226,6 @@ export default function GNGContainer() {
       <p className="text-center text-lg md:text-xl font-semibold text-indigo-600 dark:text-indigo-300 mb-6" style={{ fontFamily: "Vazirmatn" }}>
         {lang === "en" ? `Difficulty: ${LEVEL_LABEL.en[level]}` : `سطح: ${LEVEL_LABEL.fa[level]}`}
       </p>
-    
 
       {/* Controls */}
       <div className="flex flex-wrap gap-4 justify-center mb-6">
@@ -264,5 +298,6 @@ export default function GNGContainer() {
         </div>
       )}
     </div>
-  )
+    </>
+  );
 }

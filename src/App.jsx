@@ -1,5 +1,5 @@
 import { useState } from "react";
-import GNGMain from "./componnents/GuessTheNameGame/GNGMain";
+import GNGMain from "./components/GuessTheNameGame/GNGMain";
 
 function App() {
   return (

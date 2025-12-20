@@ -1,8 +1,5 @@
 // GNGCards.jsx
-export default function GNGCards({ lettersList, wrongLetters }) {
-
-    console.log(lettersList);
-    
+export default function GNGCards({ lettersList, wrongLetters }) {    
 
     const renderCards = () => {
         return lettersList.map((letter, index) => {
