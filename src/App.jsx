@@ -1,10 +1,10 @@
-import { useState } from "react";
 import GNGMain from "./components/GuessTheNameGame/GNGMain";
+import CRContainer from "./components/CursorRush/CRContainer";
 
 function App() {
   return (
     <>  
-      <GNGMain />
+      <CRContainer />
     </>
   );
 }

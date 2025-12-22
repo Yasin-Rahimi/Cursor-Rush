@@ -1,11 +1,10 @@
 {
-  "homepage": "https://github.com/Yasin-Rahimi/GuessTheNameGame",
-  "name": "hello-world",
+  "homepage": "https://Yasin-Rahimi.github.io/Cursor-Rush",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predeploy": "npm run build",
+    "predeploy": "vite build",
     "deploy": "gh-pages -d dist",
     "dev": "vite",
     "build": "vite build",
