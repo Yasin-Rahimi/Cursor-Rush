@@ -7,7 +7,7 @@ The goal is to survive as long as possible without touching any circles, with re
 
 ## 🔍 Preview
 
-![Cursor Rush Preview](src/assets/gameImage.png)
+![Cursor Rush Preview](src/gameImage.png)
 
 ---
 
